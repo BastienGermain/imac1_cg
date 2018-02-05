@@ -19,6 +19,7 @@ void resizeGL() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluOrtho2D(-1., 1., -1., 1.);
+	SDL_SetVideoMode(WINDOW_WIDTH, WINDOW_HEIGHT, BIT_PER_PIXEL, SDL_OPENGL | SDL_GL_DOUBLEBUFFER | SDL_RESIZABLE);
 }
 
 int main(int argc, char** argv) {
@@ -88,6 +89,7 @@ int main(int argc, char** argv) {
 					WINDOW_HEIGHT = e.resize.h;
 					printf("Dimensions %d, %d\n", WINDOW_WIDTH, WINDOW_HEIGHT);
 					resizeGL();
+					break;
 
                 default:
                     break;
