@@ -3,9 +3,9 @@ CFLAGS   = -Wall -O2 -g
 LIB      = -lSDL -lGLU -lGL -lm  
 INCLUDES = 
 
-OBJ      = minimal.o 
+OBJ      = ex5.o 
 RM       = rm -f
-BIN      = minimal
+BIN      = ex5
 DIRNAME  = $(shell basename $$PWD)
 BACKUP   = $(shell date +`basename $$PWD`-%m.%d.%H.%M.tgz)
 STDNAME  = $(DIRNAME).tgz
@@ -18,8 +18,8 @@ $(BIN) : $(OBJ)
 	@echo "                 to execute type: ./$(BIN) &"
 	@echo "--------------------------------------------------------------"
 
-minimal.o : minimal.c
-	@echo "compile minimal"
+ex5.o : ex5.c
+	@echo "compile ex5"
 	$(CC) $(CFLAGS) -c $<  
 	@echo "done..."
 
