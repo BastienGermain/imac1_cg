@@ -115,6 +115,35 @@ void resizeGL() {
 	SDL_SetVideoMode(WINDOW_WIDTH, WINDOW_HEIGHT, BIT_PER_PIXEL, SDL_OPENGL | SDL_GL_DOUBLEBUFFER | SDL_RESIZABLE);
 }
 
+void drawPalette() {
+    int nbColors = 4;
+
+    int colors[4][3] = {
+        {255, 0, 0},
+        {0, 255, 0},
+        {0, 0, 255},
+        {255, 255, 255}
+    };
+
+    glBegin(GL_QUADS);
+        int i;
+        for (i = 0; i < nbColors; i++) {
+            glColor3ub(colors[i][0], colors[i][1], colors[i][2]);
+
+            glVertex2f(-1 + i * (2.f / nbColors), -1);
+            glVertex2f(-1 + (i + 1) * (2.f / nbColors), -1);
+            glVertex2f(-1 + (i + 1) * (2.f / nbColors), 1);
+            glVertex2f(-1 + i * (2.f / nbColors), 1);
+        }
+    glEnd();
+}
+
+void setColor(int r, int g, int b, int color[3]) {
+    color[0] = r;
+    color[1] = g;
+    color[2] = b;
+}
+
 int main(int argc, char** argv) {
 	
     /* Initialisation de la SDL */
@@ -135,6 +164,8 @@ int main(int argc, char** argv) {
     /* Initialisation variables */
     int mode = 0; /* 1 = palette */
 
+    int color[3] = {255, 255, 255}; /* Blanc */
+
     PrimitiveList primitives = NULL;
     addPrimitive(allocPrimitive(GL_POINTS), &primitives);    
     
@@ -147,7 +178,11 @@ int main(int argc, char** argv) {
 
         glClear(GL_COLOR_BUFFER_BIT); // Nettoie la fenêtre
 
-        drawPrimitives(primitives);
+        if (mode == 1) {
+            drawPalette();
+        } else {
+            drawPrimitives(primitives);
+        }
         
         /* Echange du front et du back buffer : mise à jour de la fenêtre */
         SDL_GL_SwapBuffers();
@@ -169,6 +204,10 @@ int main(int argc, char** argv) {
 						loop = 0;
 					}
 
+                    if (e.key.keysym.sym == 32) {
+                        mode = 1;
+                    }
+
                     if (e.key.keysym.sym == 112) {
                         addPrimitive(allocPrimitive(GL_POINTS), &primitives);
                     }
@@ -183,9 +222,31 @@ int main(int argc, char** argv) {
 
                     break;
 
-                case SDL_MOUSEBUTTONUP:                    
+                case SDL_KEYUP:
 
-                    addPointToList(allocPoint(-1 + 2. * e.button.x / WINDOW_WIDTH, -(-1 + 2. * e.button.y / WINDOW_HEIGHT), 0, 255, 0), &primitives->points);
+                    if (e.key.keysym.sym == 32) {
+                        mode = 0;
+                    }
+
+                    break;
+
+                case SDL_MOUSEBUTTONUP:
+
+                    if (mode == 1) {
+
+                        if (-1 + 2. * e.button.x / WINDOW_WIDTH < -0.5) {
+                            setColor(255, 0, 0, color);
+                        } else if (-1 + 2. * e.button.x / WINDOW_WIDTH < 0) {
+                            setColor(0, 255, 0, color);                            
+                        } else if (-1 + 2. * e.button.x / WINDOW_WIDTH < 0.5) {
+                            setColor(0, 0, 255, color);
+                        } else {
+                            setColor(255, 255, 255, color);                       
+                        }
+
+                    } else {
+                        addPointToList(allocPoint(-1 + 2. * e.button.x / WINDOW_WIDTH, -(-1 + 2. * e.button.y / WINDOW_HEIGHT), color[0], color[1], color[2]), &primitives->points);
+                    }                                     
                
                     break;
                     
