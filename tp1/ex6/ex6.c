@@ -20,8 +20,18 @@ typedef struct Point{
     struct Point *next; // Point suivant à dessiner
 } Point, *PointList;
 
+typedef struct Primitive{
+    GLenum primitiveType;
+    PointList points;
+    struct Primitive *next;
+} Primitive, *PrimitiveList;
+
 PointList allocPoint(float x, float y, unsigned char r, unsigned char g, unsigned char b) {
     PointList new = malloc(sizeof(Point));
+
+    if (new == NULL) {
+        return NULL;
+    }
 
     new->x = x;
     new->y= y;
@@ -41,19 +51,57 @@ void addPointToList(Point *point, PointList *list) {
     }
 }
 
-void drawPoints(PointList list){
+void drawPoints(PointList list) {
     while (list != NULL){
 
         glColor3ub(list->r, list->g, list->b);
-        glVertex2f(-1 + 2. * list->x / WINDOW_WIDTH, -(-1 + 2. * list->y / WINDOW_HEIGHT));
+        glVertex2f(list->x, list->y);
 
         list = list->next;
     }
 }
 
-void deletePoints(PointList *list){
+void deletePoints(PointList *list) {
     while (*list !=  NULL){
         PointList next = (*list)->next;
+        free(*list);
+        *list = next;
+    }
+}
+
+Primitive* allocPrimitive(GLenum primitiveType) {
+    Primitive *new = malloc(sizeof(Primitive));
+
+    if (new == NULL) {
+        return NULL;
+    }
+
+    new->primitiveType = primitiveType;
+    new->points = NULL;
+    new->next = NULL;
+
+    return new;
+}
+
+void addPrimitive(Primitive *primitive, PrimitiveList *list) {
+    primitive->next = *list;
+    *list = primitive;
+}
+
+void drawPrimitives(PrimitiveList list) {
+    while (list != NULL) {
+        glBegin(list->primitiveType);
+        drawPoints(list->points);
+        glEnd();
+
+        list = list->next;
+    }
+}
+
+void deletePrimitives(PrimitiveList *list) {
+    while (*list !=  NULL){
+        PrimitiveList next = (*list)->next;
+        deletePoints(&(*list)->points);
         free(*list);
         *list = next;
     }
@@ -74,8 +122,6 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Impossible d'initialiser la SDL. Fin du programme.\n");
         return EXIT_FAILURE;
     }
-    
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 0);
 
     /* Ouverture d'une fenêtre et création d'un contexte OpenGL */
     if(NULL == SDL_SetVideoMode(WINDOW_WIDTH, WINDOW_HEIGHT, BIT_PER_PIXEL, SDL_OPENGL | SDL_GL_DOUBLEBUFFER | SDL_RESIZABLE)) {
@@ -86,7 +132,11 @@ int main(int argc, char** argv) {
     /* Titre de la fenêtre */
     SDL_WM_SetCaption("Le titre est changé ! :)", NULL);
 
-    glClear(GL_COLOR_BUFFER_BIT); // Nettoie la fenêtre
+    /* Initialisation variables */
+    int mode = 0; /* 1 = palette */
+
+    PrimitiveList primitives = NULL;
+    addPrimitive(allocPrimitive(GL_POINTS), &primitives);    
     
     /* Boucle d'affichage */
     int loop = 1;
@@ -94,8 +144,10 @@ int main(int argc, char** argv) {
 
         /* Récupération du temps au début de la boucle */
         Uint32 startTime = SDL_GetTicks();
-        
-        /* Placer ici le code de dessin */
+
+        glClear(GL_COLOR_BUFFER_BIT); // Nettoie la fenêtre
+
+        drawPrimitives(primitives);
         
         /* Echange du front et du back buffer : mise à jour de la fenêtre */
         SDL_GL_SwapBuffers();
@@ -110,39 +162,31 @@ int main(int argc, char** argv) {
                 break;
             }
             
-            int forme = 0;
-            
             switch(e.type) {
 
-                /* Click souris */
-                case SDL_MOUSEBUTTONUP:                    
-                    glColor3ub(255,0,0);
-
-                    glBegin(GL_POINTS);
-                        glVertex2f(-1 + 2. * e.button.x / WINDOW_WIDTH, -(-1 + 2. * e.button.y / WINDOW_HEIGHT));
-                    glEnd();
-                    
-                    break;
-
-                /* Touche clavier */
                 case SDL_KEYDOWN:
-                    printf("touche pressée (code = %d)\n", e.key.keysym.sym);
                     if (e.key.keysym.sym == 113) {
 						loop = 0;
 					}
 
                     if (e.key.keysym.sym == 112) {
-                        forme = 0;
+                        addPrimitive(allocPrimitive(GL_POINTS), &primitives);
                     }
 
                     if (e.key.keysym.sym == 108) {
-                        forme = 1;
+                        addPrimitive(allocPrimitive(GL_LINES), &primitives);
                     }
 
                     if (e.key.keysym.sym == 116) {
-                        forme = 2;
+                        addPrimitive(allocPrimitive(GL_TRIANGLES), &primitives);
                     }
 
+                    break;
+
+                case SDL_MOUSEBUTTONUP:                    
+
+                    addPointToList(allocPoint(-1 + 2. * e.button.x / WINDOW_WIDTH, -(-1 + 2. * e.button.y / WINDOW_HEIGHT), 0, 255, 0), &primitives->points);
+               
                     break;
                     
                 case SDL_VIDEORESIZE:					
@@ -165,6 +209,8 @@ int main(int argc, char** argv) {
         }
     }
     
+    /* Libère la mémoire */
+    deletePrimitives(&primitives);
 
     /* Liberation des ressources associées à la SDL */ 
     SDL_Quit();
