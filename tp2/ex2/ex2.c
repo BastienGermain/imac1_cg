@@ -3,6 +3,7 @@
 #include <GL/glu.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 /* Dimensions de la fenêtre */
 static unsigned int WINDOW_WIDTH = 800;
@@ -14,15 +15,29 @@ static const unsigned int BIT_PER_PIXEL = 32;
 /* Nombre minimal de millisecondes separant le rendu de deux images */
 static const Uint32 FRAMERATE_MILLISECONDS = 1000 / 60;
 
+static float PI = 3.14;
+static int NB_SEGMENT = 100;
 
-void drawSquare() {
-    glBegin(GL_QUADS);
-    glColor3ub(255, 255, 255);
-    glVertex2f(-0.5, -0.5);
-    glVertex2f(-0.5, 0.5);
-    glVertex2f(0.5, 0.5);
-    glVertex2f(0.5, -0.5);
-    glEnd();
+
+void drawSquare(int full) {
+    if (full == 1) {
+        glBegin(GL_QUADS);
+        glColor3ub(255, 255, 255);
+        glVertex2f(-0.5, -0.5);
+        glVertex2f(-0.5, 0.5);
+        glVertex2f(0.5, 0.5);
+        glVertex2f(0.5, -0.5);
+        glEnd();
+    } else {
+        glBegin(GL_LINE_LOOP);
+        glColor3ub(255, 255, 255);
+        glVertex2f(-0.5, -0.5);
+        glVertex2f(-0.5, 0.5);
+        glVertex2f(0.5, 0.5);
+        glVertex2f(0.5, -0.5);
+        glEnd();
+    }
+    
 }
 
 void drawLandmark() {
@@ -39,7 +54,31 @@ void drawLandmark() {
     glEnd();
 }
 
-void drawCircle() {
+void drawFilledCircle(int full){
+    int i;
+    
+    GLfloat twicePi = 2.0f * PI;
+
+    if (full == 1) {
+        glBegin(GL_TRIANGLE_FAN);
+        glVertex2f(0, 0); // center of circle
+        for(i = 0; i <= NB_SEGMENT; i++) { 
+            glVertex2f(
+                0.5 * cos(i * twicePi / NB_SEGMENT), 
+                0.5 * sin(i * twicePi / NB_SEGMENT)
+            );
+        }
+        glEnd();
+    } else {
+        glBegin(GL_LINE_LOOP);
+        for(i = 0; i <= NB_SEGMENT; i++) { 
+            glVertex2f(
+                0.5 * cos(i * twicePi / NB_SEGMENT), 
+                0.5 * sin(i * twicePi / NB_SEGMENT)
+            );
+        }
+        glEnd();
+    }
     
 }
 
@@ -78,7 +117,10 @@ int main(int argc, char** argv) {
         glClear(GL_COLOR_BUFFER_BIT); // Nettoie la fenêtre
 
         /* Ici le dessin */
+        
         drawLandmark();
+        drawSquare(0);
+        drawFilledCircle(0);
         
         /* Echange du front et du back buffer : mise à jour de la fenêtre */
         SDL_GL_SwapBuffers();
