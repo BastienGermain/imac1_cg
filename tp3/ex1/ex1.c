@@ -22,19 +22,19 @@ static int NB_SEGMENT = 50;
 void drawSquare(int full) {
     if (full == 1) {
         glBegin(GL_QUADS);
-        glColor3ub(255, 255, 255);
-        glVertex2f(-0.5, -0.5);
-        glVertex2f(-0.5, 0.5);
-        glVertex2f(0.5, 0.5);
-        glVertex2f(0.5, -0.5);
+            glColor3ub(255, 100, 100);
+            glVertex2f(-0.5, -0.5);
+            glVertex2f(-0.5, 0.5);
+            glVertex2f(0.5, 0.5);
+            glVertex2f(0.5, -0.5);
         glEnd();
     } else {
         glBegin(GL_LINE_LOOP);
-        glColor3ub(255, 255, 255);
-        glVertex2f(-0.5, -0.5);
-        glVertex2f(-0.5, 0.5);
-        glVertex2f(0.5, 0.5);
-        glVertex2f(0.5, -0.5);
+            glColor3ub(255, 255, 255);
+            glVertex2f(-0.5, -0.5);
+            glVertex2f(-0.5, 0.5);
+            glVertex2f(0.5, 0.5);
+            glVertex2f(0.5, -0.5);
         glEnd();
     }
     
@@ -42,15 +42,15 @@ void drawSquare(int full) {
 
 void drawLandmark() {
     glBegin(GL_LINES);
-    glColor3ub(0, 255, 0);
-    glVertex2f(0, -0.5);
-    glVertex2f(0, 0.5);
+        glColor3ub(0, 255, 0);
+        glVertex2f(0, -0.5);
+        glVertex2f(0, 0.5);
     glEnd();
 
     glBegin(GL_LINES);
-    glColor3ub(255, 0, 0);
-    glVertex2f(-0.5, 0);
-    glVertex2f(0.5, 0);
+        glColor3ub(255, 0, 0);
+        glVertex2f(-0.5, 0);
+        glVertex2f(0.5, 0);
     glEnd();
 }
 
@@ -61,31 +61,86 @@ void drawCircle(int full){
 
     if (full == 1) {
         glBegin(GL_TRIANGLE_FAN);
-        glColor3ub(255, 255, 255);
-        glVertex2f(0, 0); // center of circle
-        for(i = 0; i <= NB_SEGMENT; i++) { 
-            glVertex2f(
-                0.5 * cos(i * twicePi / NB_SEGMENT), 
-                0.5 * sin(i * twicePi / NB_SEGMENT)
-            );
-        }
+            glColor3ub(255, 255, 255);
+            glVertex2f(0, 0); // center of circle
+            for(i = 0; i <= NB_SEGMENT; i++) { 
+                glVertex2f(
+                    0.5 * cos(i * twicePi / NB_SEGMENT), 
+                    0.5 * sin(i * twicePi / NB_SEGMENT)
+                );
+            }
         glEnd();
     } else {
         glBegin(GL_LINE_LOOP);
-        glColor3ub(255, 255, 255);
-        for(i = 0; i <= NB_SEGMENT; i++) { 
-            glVertex2f(
-                0.5 * cos(i * twicePi / NB_SEGMENT), 
-                0.5 * sin(i * twicePi / NB_SEGMENT)
-            );
-        }
+            glColor3ub(255, 255, 255);
+            for(i = 0; i <= NB_SEGMENT; i++) { 
+                glVertex2f(
+                    0.5 * cos(i * twicePi / NB_SEGMENT), 
+                    0.5 * sin(i * twicePi / NB_SEGMENT)
+                );
+            }
         glEnd();
     }
     
 }
 
+void drawRoundedSquare() {
+    glPushMatrix();
+        glScalef(0.5, 0.5, 1);
+        glPushMatrix();
+            glTranslatef(-0.08, 0.08, 0);
+            drawCircle(1);
+        glPopMatrix();
+        glPushMatrix();
+            glTranslatef(0.08, 0.08, 0);
+            drawCircle(1);
+        glPopMatrix();
+        glPushMatrix();
+            glTranslatef(-0.08, -0.08, 0);
+            drawCircle(1);
+        glPopMatrix();
+        glPushMatrix();
+            glTranslatef(0.08, -0.08, 0);
+            drawCircle(1);
+        glPopMatrix();
+    glPopMatrix();
+}
+
+void drawFirstArm() {
+    glBegin(GL_LINE_LOOP);
+        glColor3ub(255, 255, 255);
+        glVertex2f(-3, -1);
+        glVertex2f(-3, 1);
+        glVertex2f(0, 0.5);
+        glVertex2f(0, -0.5);
+    glEnd();
+    drawCircle(1);
+    glPushMatrix();
+        glScalef(2, 2, 1);
+        glTranslatef(-1.5, 0, 0);
+        drawCircle(1);
+    glPopMatrix();
+}
+
+void drawSecondArm() {
+    drawRoundedSquare();
+    glPushMatrix();
+        glTranslatef(-2.25, 0, 0);
+        drawRoundedSquare();
+    glPopMatrix();
+    glPushMatrix();
+        glScalef(2.5, 0.4, 1);
+        glTranslatef(-0.45, 0, 0);
+        drawSquare(1);
+    glPopMatrix();
+}
+
+void drawThirdArm() {
+    
+}
+
 int main(int argc, char** argv) {
-	
+    
     /* Initialisation de la SDL */
     if(-1 == SDL_Init(SDL_INIT_VIDEO)) {
         fprintf(stderr, "Impossible d'initialiser la SDL. Fin du programme.\n");
@@ -116,10 +171,20 @@ int main(int argc, char** argv) {
         glClear(GL_COLOR_BUFFER_BIT); // Nettoie la fenêtre
 
         /* Ici le dessin */
+            
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
 
         drawLandmark();
-        drawCircle(0);
+        glPushMatrix();
+            glTranslatef(1, 2, 0);
+            drawFirstArm();
+        glPopMatrix();
 
+        glPushMatrix();
+            glTranslatef(-1, -1, 0);
+            drawSecondArm();
+        glPopMatrix();
         
         /* Echange du front et du back buffer : mise à jour de la fenêtre */
         SDL_GL_SwapBuffers();
@@ -138,8 +203,8 @@ int main(int argc, char** argv) {
 
                 case SDL_KEYDOWN:
                     if (e.key.keysym.sym == 113) {
-						loop = 0;
-					}
+                        loop = 0;
+                    }
                     break;
 
                 default:
