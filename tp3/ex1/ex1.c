@@ -107,30 +107,32 @@ void drawRoundedSquare() {
 }
 
 void drawFirstArm() {
-    glBegin(GL_LINE_LOOP);
-        glColor3ub(255, 255, 255);
-        glVertex2f(-3, -1);
-        glVertex2f(-3, 1);
-        glVertex2f(0, 0.5);
-        glVertex2f(0, -0.5);
-    glEnd();
-    drawCircle(1);
     glPushMatrix();
         glScalef(2, 2, 1);
-        glTranslatef(-1.5, 0, 0);
         drawCircle(1);
     glPopMatrix();
+    glBegin(GL_LINE_LOOP);
+        glColor3ub(255, 255, 255);
+        glVertex2f(-3, -0.5);
+        glVertex2f(-3, 0.5);
+        glVertex2f(0, 1);
+        glVertex2f(0, -1);
+    glEnd();
+    glPushMatrix();
+        glTranslatef(-3, 0, 0);
+        drawCircle(1);
+    glPopMatrix();    
 }
 
 void drawSecondArm() {
     drawRoundedSquare();
     glPushMatrix();
-        glTranslatef(-2.25, 0, 0);
+        glTranslatef(2.25, 0, 0);
         drawRoundedSquare();
     glPopMatrix();
     glPushMatrix();
         glScalef(2.5, 0.4, 1);
-        glTranslatef(-0.45, 0, 0);
+        glTranslatef(0.45, 0, 0);
         drawSquare(1);
     glPopMatrix();
 }
@@ -142,11 +144,11 @@ void drawThirdArm() {
     glPopMatrix();
     glPushMatrix();
         glScalef(2.2, 0.3, 1);
-        glTranslatef(-0.45, 0, 0);
+        glTranslatef(0.45, 0, 0);
         drawSquare(0);
     glPopMatrix();
     glPushMatrix();
-        glTranslatef(-2, 0, 0);
+        glTranslatef(2, 0, 0);
         glScalef(0.45, 0.45, 0);
         drawSquare(1);
     glPopMatrix();
@@ -173,6 +175,11 @@ int main(int argc, char** argv) {
     
     /* Titre de la fenêtre */
     SDL_WM_SetCaption("Le titre est changé ! :)", NULL);
+
+    /* Valeur angles */
+    float alpha = 0.0;
+    float beta = 0.0;
+    float gamma = 0.0;
     
     /* Boucle d'affichage */
     int loop = 1;
@@ -183,6 +190,10 @@ int main(int argc, char** argv) {
 
         glClear(GL_COLOR_BUFFER_BIT); // Nettoie la fenêtre
 
+        alpha += 1.0;
+        beta += 2.0;
+        gamma += 4.0;
+
         /* Ici le dessin */
             
         glMatrixMode(GL_MODELVIEW);
@@ -191,23 +202,16 @@ int main(int argc, char** argv) {
         //drawLandmark();
 
         glPushMatrix();
-            glTranslatef(-1, 0, 0);
-            glRotatef(45, 0, 0, 1.0);
+            glRotatef(alpha, 0, 0, 1.0);
             drawFirstArm();
-        glPopMatrix();
-
-        glPushMatrix();
-            glTranslatef(1.3, 0, 0);
-            glRotatef(-50, 0, 0, 1.0);
+            glTranslatef(-3, 0, 0);
+            glRotatef(180, 0, 0, 1.0);
+            glRotatef(beta, 0, 0, 1.0);            
             drawSecondArm();
-        glPopMatrix();
-
-        /*glPushMatrix();
-            glTranslatef(-1.2, 0, 0);
-            glRotatef(45, 0, 0, 1.0);
+            glTranslatef(2.25, 0, 0);
+            glRotatef(gamma, 0, 0, 1.0);
             drawThirdArm();
-        glPopMatrix();*/
-        
+        glPopMatrix();        
         
         /* Echange du front et du back buffer : mise à jour de la fenêtre */
         SDL_GL_SwapBuffers();
