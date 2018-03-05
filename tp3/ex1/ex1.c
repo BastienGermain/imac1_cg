@@ -136,7 +136,20 @@ void drawSecondArm() {
 }
 
 void drawThirdArm() {
-    
+    glPushMatrix();
+        glScalef(0.5, 0.5, 1);
+        drawCircle(1);
+    glPopMatrix();
+    glPushMatrix();
+        glScalef(2.2, 0.3, 1);
+        glTranslatef(-0.45, 0, 0);
+        drawSquare(0);
+    glPopMatrix();
+    glPushMatrix();
+        glTranslatef(-2, 0, 0);
+        glScalef(0.45, 0.45, 0);
+        drawSquare(1);
+    glPopMatrix();
 }
 
 int main(int argc, char** argv) {
@@ -156,7 +169,7 @@ int main(int argc, char** argv) {
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-4., 4., -4., 4.);    
+    gluOrtho2D(-6., 6., -6., 6.);    
     
     /* Titre de la fenêtre */
     SDL_WM_SetCaption("Le titre est changé ! :)", NULL);
@@ -175,16 +188,26 @@ int main(int argc, char** argv) {
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
 
-        drawLandmark();
+        //drawLandmark();
+
         glPushMatrix();
-            glTranslatef(1, 2, 0);
+            glTranslatef(-1, 0, 0);
+            glRotatef(45, 0, 0, 1.0);
             drawFirstArm();
         glPopMatrix();
 
         glPushMatrix();
-            glTranslatef(-1, -1, 0);
+            glTranslatef(1.3, 0, 0);
+            glRotatef(-50, 0, 0, 1.0);
             drawSecondArm();
         glPopMatrix();
+
+        /*glPushMatrix();
+            glTranslatef(-1.2, 0, 0);
+            glRotatef(45, 0, 0, 1.0);
+            drawThirdArm();
+        glPopMatrix();*/
+        
         
         /* Echange du front et du back buffer : mise à jour de la fenêtre */
         SDL_GL_SwapBuffers();
